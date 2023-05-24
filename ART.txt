@@ -1,0 +1,57 @@
+import numpy as np
+
+class ART1:
+    def __init__(self, num_input_nodes, num_categories, vigilance):
+        self.num_input_nodes = num_input_nodes
+        self.num_categories = num_categories
+        self.vigilance = vigilance
+        self.weights = np.ones((num_categories, num_input_nodes))
+
+    def learn(self, input_pattern):
+        while True:
+            # calculate the response of each category to the input pattern
+            response = np.dot(self.weights, input_pattern)
+            # calculate the sum of the weights of each category
+            weights_sum = np.sum(self.weights, axis=1)
+            # calculate the activation of each category
+            activation = response / weights_sum
+            # find the category with the highest activation
+            category = np.argmax(activation)
+            # calculate the match between the input pattern and the category
+            match = np.sum(np.minimum(self.weights[category], input_pattern))
+            # calculate the normalized match
+            normalized_match = match / np.sum(input_pattern)
+            # if the normalized match is greater than the vigilance, the input pattern
+            # is assigned to the category, and the weights are updated
+            if normalized_match > self.vigilance:
+                self.weights[category] = np.minimum(self.weights[category], input_pattern)
+                break
+            # if the normalized match is less than or equal to the vigilance, a new category
+            # is created with the input pattern as its weights
+            else:
+                self.weights = np.vstack([self.weights, input_pattern])
+                self.num_categories += 1
+
+    def classify(self, input_pattern):
+        # calculate the response of each category to the input pattern
+        response = np.dot(self.weights, input_pattern)
+        # calculate the sum of the weights of each category
+        weights_sum = np.sum(self.weights, axis=1)
+        # calculate the activation of each category
+        activation = response / weights_sum
+        # find the category with the highest activation
+        category = np.argmax(activation)
+        # return the category index and its activation
+        return category, activation[category]
+
+# create an ART1 network with 4 input nodes, 3 categories, and vigilance of 0.7
+network = ART1(4, 3, 0.7)
+
+# learn some input patterns
+network.learn(np.array([1, 0, 1, 0]))
+network.learn(np.array([0, 1, 0, 1]))
+network.learn(np.array([1, 1, 0, 0]))
+
+# classify some input patterns
+print(network.classify(np.array([1, 0, 0, 0])))
+print(network.classify(np.array([0, 1, 1, 0])))

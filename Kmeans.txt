@@ -1,0 +1,50 @@
+import numpy as np
+
+# Data points
+points = np.array([[0.1, 0.6],
+                   [0.15, 0.71],
+                   [0.08, 0.9],
+                   [0.16, 0.85],
+                   [0.2, 0.3],
+                   [0.25, 0.5],
+                   [0.24, 0.1],
+                   [0.3, 0.2]])
+
+# Initial centroids
+m1 = np.array([0.1, 0.6])  # P1
+m2 = np.array([0.3, 0.2])  # P8
+
+# Perform k-means clustering
+max_iterations = 100
+for _ in range(max_iterations):
+    # Step 1: Assign data points to the nearest centroid
+    distances = np.linalg.norm(points - m1, axis=1)
+    cluster1_indices = np.where(distances <= np.linalg.norm(points - m2, axis=1))
+    cluster2_indices = np.where(distances > np.linalg.norm(points - m2, axis=1))
+
+    cluster1 = points[cluster1_indices]
+    cluster2 = points[cluster2_indices]
+
+    # Step 2: Update the centroids
+    new_m1 = np.mean(cluster1, axis=0)
+    new_m2 = np.mean(cluster2, axis=0)
+
+    # Check for convergence
+    if np.array_equal(m1, new_m1) and np.array_equal(m2, new_m2):
+        break
+
+    m1 = new_m1
+    m2 = new_m2
+
+# Answers to the questions
+p6_cluster = 1 if np.array_equal(points[5], cluster1[1]) else 2
+cluster2_population = len(cluster2)
+
+# Updated centroid values
+updated_m1 = m1
+updated_m2 = m2
+
+print("1) P6 belongs to Cluster:", p6_cluster)
+print("2) Population of Cluster around m2:", cluster2_population)
+print("3) Updated value of m1:", updated_m1)
+print("   Updated value of m2:", updated_m2)

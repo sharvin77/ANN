@@ -1,0 +1,49 @@
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score
+import numpy as np
+
+# Load the Twitter Sentiment Analysis Dataset
+url = "https://raw.githubusercontent.com/zfz/twitter_corpus/master/full-corpus.csv"
+data = pd.read_csv(url)
+
+# Select a subset of 10000 instances for training and testing
+data = data.sample(n=5113, random_state=42)
+
+# Preprocess the data by removing unwanted characters and converting sentiment to binary values
+data['TweetText'] = data['TweetText'].str.replace('<.*?>', '', regex=True)
+data['TweetText'] = data['TweetText'].str.replace('[^a-zA-Z0-9\s]', '', regex=True)
+data['Sentiment'] = (data['Sentiment'] == 'positive').astype(int)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(data['TweetText'], data['Sentiment'], test_size=0.2, random_state=42)
+
+# Vectorize the text data using bag-of-words representation
+vectorizer = CountVectorizer()
+X_train = vectorizer.fit_transform(X_train)
+X_test = vectorizer.transform(X_test)
+
+# Train a Naive Bayes classifier
+classifier = MultinomialNB()
+classifier.fit(X_train, y_train)
+
+# Predict sentiment for test data
+y_pred = classifier.predict(X_test)
+
+# Calculate accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy:", accuracy)
+
+# Output predicted sentiment for last 5 instances of the test data
+last_5_instances = X_test[-5:]
+predicted_sentiments = classifier.predict(last_5_instances)
+print("Predicted Sentiments for Last 5 Instances:")
+
+for sentiment in predicted_sentiments:
+    index = np.where(sentiment)
+    if sentiment == 1:
+        print(last_5_instances[index],"positive")
+    else:
+        print(last_5_instances[index],"negative")

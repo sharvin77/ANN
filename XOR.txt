@@ -1,0 +1,52 @@
+import numpy as np
+
+# Define the sigmoid activation function
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+# Define the derivative of the sigmoid function
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+# Define the XOR training data
+input_data = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+output_data = np.array([[0], [1], [1], [0]])
+
+# Initialize the weights randomly
+np.random.seed(42)
+weights0 = 2 * np.random.random((2, 2)) - 1
+weights1 = 2 * np.random.random((2, 1)) - 1
+
+# Define the number of epochs and learning rate
+epochs = 10000
+learning_rate = 0.1
+
+# Train the neural network
+for epoch in range(epochs):
+    # Forward propagation
+    layer0 = input_data
+    layer1 = sigmoid(np.dot(layer0, weights0))
+    layer2 = sigmoid(np.dot(layer1, weights1))
+
+    # Backward propagation
+    layer2_error = output_data - layer2
+    layer2_delta = layer2_error * sigmoid_derivative(layer2)
+
+    layer1_error = layer2_delta.dot(weights1.T)
+    layer1_delta = layer1_error * sigmoid_derivative(layer1)
+
+    # Update weights
+    weights1 += learning_rate * layer1.T.dot(layer2_delta)
+    weights0 += learning_rate * layer0.T.dot(layer1_delta)
+
+# Test the neural network
+layer0 = input_data
+layer1 = sigmoid(np.dot(layer0, weights0))
+layer2 = sigmoid(np.dot(layer1, weights1))
+
+# Round the predictions to obtain the final binary outputs
+rounded_predictions = np.round(layer2)
+
+# Print the predictions
+for i in range(len(input_data)):
+    print(f"Input: {input_data[i]}, Predicted Output: {rounded_predictions[i]}")

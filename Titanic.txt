@@ -1,0 +1,39 @@
+import pandas as pd
+import numpy as np
+
+# Load the dataset
+url = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
+data = pd.read_csv(url)
+
+# Display the first few rows of the dataset
+print(data.head())
+
+# Check the data types and missing values
+print(data.info())
+
+# Check the summary statistics of the numerical columns
+print(data.describe())
+
+# Check the unique values in categorical columns
+print(data["Embarked"].unique())
+
+
+# Handle missing values
+data["Age"].fillna(data["Age"].median(), inplace=True)
+data["Embarked"].fillna(data["Embarked"].mode()[0], inplace=True)
+data.drop("Cabin", axis=1, inplace=True)
+
+# Encode categorical variables
+data_encoded = pd.get_dummies(data, columns=["Sex", "Embarked"], drop_first=True)
+
+# Perform feature scaling on numerical columns using standardization (mean normalization)
+data_encoded["Age"] = (data_encoded["Age"] - data_encoded["Age"].mean()) / data_encoded["Age"].std()
+data_encoded["Fare"] = (data_encoded["Fare"] - data_encoded["Fare"].mean()) / data_encoded["Fare"].std()
+
+# Split the dataset into features and target
+X = data_encoded.drop("Survived", axis=1)
+y = data_encoded["Survived"]
+
+# Print the processed dataset
+print(X.head())
+print(y.head())
